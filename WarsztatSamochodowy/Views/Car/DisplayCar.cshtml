@@ -1,0 +1,113 @@
+﻿@model WarsztatSamochodowy.Models.Car
+
+@{
+    ViewData["Title"] = "See/Edit Vehicle Details";
+}
+<h1>@ViewData["Title"]</h1>
+
+@{
+    @*var car = Model;
+    var carId = car.CarId;
+    var carMake = car.CarMake;
+    var carModel = car.CarModel;
+    var arrival = car.Arrival;
+    var dateDone = car.DateDone;
+    var ownerId = car.Owner.Id;
+    var registration = car.Registration; *@
+
+    <form>
+            <div class="form-group">
+                <label for="CarId">Id</label>
+                <input type="text" class="form-control" id="inputId" value="@Model.CarId" readonly>
+            </div>
+            <div class="form-group">
+                <label for="CarMake">Make</label>
+                <input type="text" class="form-control" id="inputMake" value="@Model.CarMake">
+            </div>
+            <div class="form-group">
+                <label for="CarModel">Model</label>
+                <input type="text" class="form-control" id="inputModel" value="@Model.CarModel">
+            </div>
+            <div class="form-group">
+                <label for="arrivalDate">Arrival Date:</label>
+                <input type="text" class="form-control" id="arrivalDate" name="arrivalDate" value="@Model.Arrival.Date.ToString("yyyy-MM-dd")" readonly>
+            </div>
+            <div class="form-group">
+                <label for="arrivalTime">Arrival Time:</label>
+                <input type="text" class="form-control" id="arrivalTime" name="arrivalTime" value="@Model.Arrival.TimeOfDay" readonly>
+            </div>
+            <div class="form-group">
+                <label for="depDate">Service Finished</label>
+                <input type="text" class="form-control" id="depDate" name="depDate" value="@Model.DateDone.Date.ToString("yyyy-MM-dd")" readonly>
+            </div>
+            <div class="form-group">
+                <label for="depTime">Finish Time:</label>
+                <input type="text" class="form-control" id="depTime" name="depTime" value="@Model.DateDone.TimeOfDay" readonly>
+            </div>
+            <div class="form-group">
+                <label for="OwnerId">OwnerId</label>
+                <input type="number" class="form-control" id="inputOwner" value="@Model.Owner.Id">
+            </div>
+            <div class="form-group">
+                <label for="Reg">Registration</label>
+                <input type="text" class="form-control" id="inputReg" value="@Model.Registration">
+            </div>
+            <a href="#" onclick="editCar()" class="btn btn-primary">Edit</a>
+    </form>
+
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.3/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+    var datePicker = flatpickr("#arrivalDate", {
+        enableTime: false,
+        dateFormat: "d-m-Y"
+    });
+
+    // Initialize the time picker
+    var timePicker = flatpickr("#arrivalTime", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true
+    });
+    var datePicker = flatpickr("#depDate", {
+        enableTime: false,
+        dateFormat: "d-m-Y"
+    });
+
+    // Initialize the time picker
+    var timePicker = flatpickr("#depTime", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true
+    });
+
+    function editCar() {
+        if (confirm("Edit Car?")) {
+            var carId = document.getElementById("inputId").value;
+            var carMake = document.getElementById("inputMake").value;
+            var carModel = document.getElementById("inputModel").value;
+            var ownerId = document.getElementById("inputOwner").value;
+            var registration = document.getElementById("inputReg").value;
+            fetch(`/Car/EditCar?carId=${carId}&carMake=${carMake}&carModel=${carModel}&ownerId=${ownerId}&registration=${registration}`, {
+                method: 'PUT',
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // Reload the page or perform any necessary actions
+                        location.reload();
+                    } else {
+                        console.error("Error editing the car.");
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
+    }
+</script>
+

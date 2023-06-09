@@ -1,0 +1,116 @@
+﻿@model WarsztatSamochodowy.Models.Car
+
+@{
+    ViewData["Title"] = "Add a new Vehicle";
+}
+<h1>@ViewData["Title"]</h1>
+
+<form>
+    <div class="form-group">
+        <label for="CarMake">Make</label>
+        <input type="text" class="form-control" id="inputMake" placeholder="E.g.: Volkswagen">
+    </div>
+    <div class="form-group">
+        <label for="CarModel">Model</label>
+        <input type="text" class="form-control" id="inputModel" placeholder="E.g.: Golf VI">
+    </div>
+    <div class="form-group">
+        <label for="arrivalDate">Arrival Date:</label>
+        <input type="text" class="form-control" id="arrivalDate" name="arrivalDate" placeholder="01.01.2022" readonly>
+    </div>
+    <div class="form-group">
+        <label for="arrivalTime">Arrival Time:</label>
+        <input type="text" class="form-control" id="arrivalTime" name="arrivalTime" placeholder="15:15" readonly>
+    </div>
+    <div class="form-group">
+        <label for="depDate">Service Finished</label>
+        <input type="text" class="form-control" id="depDate" name="depDate" placeholder="01.01.2022" readonly>
+    </div>
+    <div class="form-group">
+        <label for="depTime">Finish Time:</label>
+        <input type="text" class="form-control" id="depTime" name="depTime" placeholder="15:15" readonly>
+    </div>
+    <div class="form-group">
+        <label for="OwnerId">OwnerId</label>
+        <input type="number" class="form-control" id="inputOwner" placeholder="E.g.: 105">
+    </div>
+    <div class="form-group">
+        <label for="Reg">Registration</label>
+        <input type="text" class="form-control" id="inputReg" placeholder="E.g.: EL 00001">
+    </div>
+    
+    <button type="submit" class="btn btn-primary" style="margin-top: 10px"><a href="#" onclick="createCar()" class="btn btn-primary">Add Vehicle</a></button>
+    
+</form>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.3/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<!-- Initialize the date picker -->
+<script>
+    var datePicker = flatpickr("#arrivalDate", {
+        enableTime: false,
+        dateFormat: "Y-m-d"
+    });
+
+    // Initialize the time picker
+    var timePicker = flatpickr("#arrivalTime", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true
+    });
+    var datePicker = flatpickr("#depDate", {
+        enableTime: false,
+        dateFormat: "Y-m-d"
+    });
+
+    // Initialize the time picker
+    var timePicker = flatpickr("#depTime", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true
+    });
+
+    function createCar() 
+    {
+        if (confirm("Create Car?")) 
+        {
+            var carMake = document.getElementById("inputMake").value;
+            var carModel = document.getElementById("inputModel").value;
+            var ownerId = document.getElementById("inputOwner").value;
+            var registration = document.getElementById("inputReg").value;
+
+            //arrival date
+            var arrivalDateInput = document.getElementById("arrivalDate").value;
+            var arrivalTimeInput = document.getElementById("arrivalTime").value;
+            var arrivalDateTimeStr = arrivalDateInput + 'T' + arrivalTimeInput + ':00';
+            var arrival = new Date(arrivalDateTimeStr);
+            var formattedArrival = arrival.toISOString();
+
+            //dep date
+            var dateDoneDateInput = document.getElementById("depDate").value;
+            var dateDoneTimeInput = document.getElementById("depTime").value;
+            var dateDoneDateTimeString = dateDoneDateInput + 'T' + dateDoneTimeInput + ':00';
+            var dateDone = new Date(dateDoneDateTimeString);
+            var formattedDateDone = dateDone.toISOString();
+
+
+            fetch(`/Car/CreateCar?carMake=${carMake}&carModel=${carModel}&arrival='${formattedArrival}'&dateDone='${formattedDateDone}'&ownerId=${ownerId}&registration=${registration}`, {
+                method: 'POST',
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // Reload the page or perform any necessary actions
+                        location.reload();
+                    } else {
+                        console.error("Error editing the car.");
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }
+    }
+</script>
