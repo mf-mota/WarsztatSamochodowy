@@ -1,2 +1,3 @@
 ASP .NET CORE MVC Project
 Internet page to add and edit cars and clients to SQL DB using http endpoints and SqlConnection
+#TODO: SQL Transactions to be added
