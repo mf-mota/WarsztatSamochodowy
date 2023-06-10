@@ -121,29 +121,24 @@ namespace WarsztatSamochodowy.Data
                 using (con = new SqlConnection(ConStr))
                 {
                     con.Open();
-                    //var cmd = new SqlCommand("GetCars", con);
-                    var cmd = new SqlCommand();
-                    //here i added the query
-
-                    cmd.Connection = con;
-                    cmd.CommandText = $"DELETE FROM Cars WHERE CarId={carId}";
-                    int rowsDeleted = cmd.ExecuteNonQuery();
-                    if (rowsDeleted > 0)
+                    SqlTransaction tran = con.BeginTransaction();
+                    try
                     {
-                        Console.WriteLine($"{rowsDeleted} \n rows were deleted");
-                        con.Close();
-                        return true;
+                        var cmd = new SqlCommand();
+                        cmd.Connection = con;
+                        cmd.Transaction = tran;
+                        cmd.CommandText = $"DELETE FROM Cars WHERE CarId={carId}";
+                        int rowsDeleted = cmd.ExecuteNonQuery();
+                        tran.Commit();
+                        return rowsDeleted > 0;
                     }
 
-                    else
+                    catch (Exception)
                     {
-                        Console.WriteLine("No rows affected");
-                        con.Close();
-                        return false;
+                        tran.Rollback();
+                        throw;
                     }
-
                 }
-
             }
             catch (Exception)
             {
@@ -157,17 +152,27 @@ namespace WarsztatSamochodowy.Data
                 using (con = new SqlConnection(ConStr))
                 {
                     con.Open();
-                    var cmd = new SqlCommand();
-                    cmd.Connection = con;
-                    cmd.CommandText = $"Update Cars " +
-                        $"SET CarMake='{carMake}', CarModel='{carModel}', " +
-                        $"Owner={ownerId}, Registration='{registration}' " +
-                        $"WHERE CarId={carId}";
-                    int rowChanged = cmd.ExecuteNonQuery();
-                    if (rowChanged > 0)
-                        return true;
-                    else
-                        return false;
+                    SqlTransaction tranEdit = con.BeginTransaction();
+
+                    try
+                    {
+                        var cmd = new SqlCommand();
+                        cmd.Connection = con;
+                        cmd.Transaction = tranEdit;
+                        cmd.CommandText = $"Update Cars " +
+                            $"SET CarMake='{carMake}', CarModel='{carModel}', " +
+                            $"Owner={ownerId}, Registration='{registration}' " +
+                            $"WHERE CarId={carId}";
+                        int rowChanged = cmd.ExecuteNonQuery();
+                        tranEdit.Commit();
+                        return rowChanged > 0;
+
+                    }
+                    catch (Exception)
+                    {
+                        tranEdit.Rollback();
+                        throw;
+                    }
                 }
 
             }
@@ -183,18 +188,29 @@ namespace WarsztatSamochodowy.Data
                 using (con = new SqlConnection(ConStr))
                 {
                     con.Open();
-                    var cmd = new SqlCommand();
-                    cmd.Connection = con;
-                    cmd.CommandText = $"INSERT INTO Cars " +
-                        $"VALUES ('{carMake}', '{carModel}', " +
-                        $"{arrival}, {dateDone}, {ownerId}, '{registration}') ";
-                    int rowAdded = cmd.ExecuteNonQuery();
-                    if (rowAdded > 0)
-                        return true;
-                    else
-                        return false;
-                }
+                    SqlTransaction transaction = con.BeginTransaction();
 
+                    try
+                    {
+                        var cmd = new SqlCommand();
+                        cmd.Connection = con;
+                        cmd.Transaction = transaction;
+                        cmd.CommandText = $"INSERT INTO Cars " +
+                            $"VALUES ('{carMake}', '{carModel}', " +
+                            $"{arrival}, {dateDone}, {ownerId}, '{registration}')";
+
+                        int rowsAdded = cmd.ExecuteNonQuery();
+
+                        transaction.Commit();
+
+                        return rowsAdded > 0;
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
             }
             catch (Exception)
             {
@@ -207,14 +223,13 @@ namespace WarsztatSamochodowy.Data
 
 
 
-    public interface ICarService
-    {
-        public List<Car> GetCars();
-        public bool DeleteCar(int carId);
-        public Car DisplayCar(int carId);
-        public bool EditCar(int carId, string carMake, string carModel, int ownerId, string registration);
-        public bool CreateCar(string carMake, string carModel, string arrival, string dateDone, int ownerId, string registration);
-    }
-     
+public interface ICarService
+{
+    public List<Car> GetCars();
+    public bool DeleteCar(int carId);
+    public Car DisplayCar(int carId);
+    public bool EditCar(int carId, string carMake, string carModel, int ownerId, string registration);
+    public bool CreateCar(string carMake, string carModel, string arrival, string dateDone, int ownerId, string registration);
+}
 
-        
+

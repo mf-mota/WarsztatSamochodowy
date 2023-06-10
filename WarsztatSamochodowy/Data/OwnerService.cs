@@ -54,16 +54,24 @@ namespace WarsztatSamochodowy.Data
                 using (con = new SqlConnection(ConStr))
                 {
                     con.Open();
-                    var cmd = new SqlCommand();
-                    cmd.Connection = con;
-                    cmd.CommandText = $"INSERT INTO CarOwners " +
+                    SqlTransaction tran = con.BeginTransaction();
+                    try
+                    {
+                        var cmd = new SqlCommand();
+                        cmd.Connection = con;
+                        cmd.Transaction = tran;
+                        cmd.CommandText = $"INSERT INTO CarOwners " +
                         $"VALUES ('{firstName}', '{lastName}', " +
                         $"{phoneNumber}) ";
-                    int rowAdded = cmd.ExecuteNonQuery();
-                    if (rowAdded > 0)
-                        return true;
-                    else
-                        return false;
+                        int rowAdded = cmd.ExecuteNonQuery();
+                        tran.Commit();
+                        return rowAdded > 0;
+                    }
+                    catch (Exception)
+                    {
+                        tran.Rollback();
+                        throw;
+                    }
                 }
 
             }
@@ -78,10 +86,10 @@ namespace WarsztatSamochodowy.Data
 
 }
 
-    public interface IOwnerService
-    {
-        public List<CarOwner> GetOwners();
-        public bool OwnerCreate(string firstName, string lastName, int phoneNumber);
-    }
+public interface IOwnerService
+{
+    public List<CarOwner> GetOwners();
+    public bool OwnerCreate(string firstName, string lastName, int phoneNumber);
+}
 
 
